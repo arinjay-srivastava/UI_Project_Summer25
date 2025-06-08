@@ -15,7 +15,7 @@ NotePad is a simple web app where you can create, view, edit, and delete notes. 
 
 ### ER-Diagram
 
-![[ERD-1.jpg]]
+ ![ERD](https://github.com/user-attachments/assets/c9d23877-de4d-44fa-be64-e37ed48d08c2)
 
 This diagram shows how the app connects users, notes, and followers:
 

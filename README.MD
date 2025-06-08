@@ -25,7 +25,7 @@ This diagram shows how the app connects users, notes, and followers:
 
 ### Relations Diagram
 
-![[Relations Diagram.jpg]]
+![Relations Diagram](https://github.com/user-attachments/assets/e7e87626-cb08-4759-94b1-e76a93e5b7d2)
 
 This shows the tables and their columns:
 

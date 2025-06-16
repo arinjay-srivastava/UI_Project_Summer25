@@ -18,17 +18,24 @@ const User = mongoose.model("User", userSchema);
 
 // CREATE a user
 async function register(firstName, lastName, userName, email, password) {
-  const user = await getUser(userName);
-  if (user) throw Error('Username already in use');
-  const newUser = await User.create({
-    firstName,
-    lastName,
-    userName,
-    email,
-    password,
-    deleted: false
-  });
-  return newUser;
+  const existingUser = await User.findOne({ $or: [{ userName }, { email }] });
+  if (existingUser) {
+    if (existingUser.userName === userName) throw Error('Username already in use');
+    if (existingUser.email === email) throw Error('Email already in use');
+  }
+  try {
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      userName,
+      email,
+      password,
+      deleted: false
+    });
+    return newUser;
+  } catch (error) {
+    throw Error('Failed to create user: ' + error.message);
+  }
 }
 
 // READ a user

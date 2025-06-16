@@ -1,45 +1,84 @@
-// 1. import any needed libraries
 const express = require("express");
-const User = require('../models/user'); //accesses functions in user model file
+const mongoose = require("mongoose");
+const { register, login, updateUser, deleteUser } = require('../models/user');
 const router = express.Router();
 
-// 2. create all routes to access database
 router
   .post('/login', async (req, res) => {
     try {
-      const user = await User.login(req.body.username, req.body.password);
-      res.send({...user, password: undefined});
-    } catch(error) {
+      if (!req.body) {
+        return res.status(400).send({ message: 'Request body is missing' });
+      }
+      const { userName, password } = req.body;
+      if (!userName || !password) {
+        return res.status(400).send({ message: 'Username and password are required' });
+      }
+      const user = await login(userName, password);
+      res.send({ message: 'Login successful', ...user, password: undefined });
+    } catch (error) {
+      console.log('Login error:', error); // Debug log
       res.status(401).send({ message: error.message });
     }
   })
 
   .post('/register', async (req, res) => {
     try {
-      const user = await User.register(req.body.username, req.body.password);
-      res.send({...user, password: undefined});
-    } catch(error) {
-      res.status(401).send({ message: error.message }); 
+      console.log('Register request body:', req.body); // Debug log
+      if (!req.body) {
+        return res.status(400).send({ message: 'Request body is missing' });
+      }
+      const { firstName, lastName, userName, email, password } = req.body;
+      if (!firstName || !lastName || !userName || !email || !password) {
+        return res.status(400).send({ message: 'All fields are required' });
+      }
+      const user = await register(firstName, lastName, userName, email, password);
+      res.send({ message: 'Account registered', ...user, password: undefined });
+    } catch (error) {
+      console.log('Register error:', error); // Debug log
+      res.status(401).send({ message: error.message });
     }
   })
 
   .put('/update', async (req, res) => {
     try {
-      const user = await User.updatePassword(req.body.id, req.body.password);
-      res.send({...user, password: undefined});
-    } catch(error) {
+      console.log('Update request body:', req.body); // Debug log
+      if (!req.body) {
+        return res.status(400).send({ message: 'Request body is missing' });
+      }
+      const { userId, password } = req.body;
+      if (!userId || !password) {
+        return res.status(400).send({ message: 'User ID and password are required' });
+      }
+      if (!mongoose.isValidObjectId(userId)) {
+        return res.status(400).send({ message: 'Invalid user ID format' });
+      }
+      const user = await updateUser(userId, password);
+      res.send({ message: 'Password updated', ...user, password: undefined });
+    } catch (error) {
+      console.log('Update error:', error); // Debug log
       res.status(401).send({ message: error.message });
     }
   })
 
   .delete('/delete', async (req, res) => {
     try {
-      await User.deleteUser(req.body.id);
-      res.send({ success: "Account deleted" });
-    } catch(error) {
+      console.log('Delete request body:', req.body); // Debug log
+      if (!req.body) {
+        return res.status(400).send({ message: 'Request body is missing' });
+      }
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).send({ message: 'User ID is required' });
+      }
+      if (!mongoose.isValidObjectId(userId)) {
+        return res.status(400).send({ message: 'Invalid user ID format' });
+      }
+      const user = await deleteUser(userId);
+      res.send({ message: 'Account deleted', ...user, password: undefined });
+    } catch (error) {
+      console.log('Delete error:', error); // Debug log
       res.status(401).send({ message: error.message });
     }
-  })
+  });
 
-// 3. export router for use in index.js
 module.exports = router;

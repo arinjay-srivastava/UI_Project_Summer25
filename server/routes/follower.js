@@ -35,4 +35,5 @@ router.post('/count', async (req, res) => {
   }
 });
 
+// There's no UPDATE function for followers, as following/unfollowing can be done by CREATE and DELETE functions.
 module.exports = router;

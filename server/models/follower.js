@@ -47,4 +47,5 @@ async function getFollowerCount(userId) {
   return { userId, count };
 }
 
+// There's no UPDATE function for followers, as following/unfollowing can be done by CREATE and DELETE functions. 
 module.exports = { followUser, unfollowUser, getFollowerCount };

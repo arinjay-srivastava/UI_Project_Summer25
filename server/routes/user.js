@@ -1,76 +1,58 @@
+const express = require('express');
 const mongoose = require('mongoose');
-
-const userSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  userName: { type: String, required: true, unique: true },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email']
-  },
-  password: { type: String, required: true },
-  deleted: { type: Boolean, default: false }
-});
-
-const User = mongoose.model("User", userSchema);
-
-// CREATE a user
-async function register(firstName, lastName, userName, email, password) {
-  const existingUser = await User.findOne({ $or: [{ userName }, { email }] });
-  if (existingUser) {
-    if (existingUser.userName === userName) throw Error('Username already in use');
-    if (existingUser.email === email) throw Error('Email already in use');
-  }
-  try {
-    const newUser = await User.create({
-      firstName,
-      lastName,
-      userName,
-      email,
-      password,
-      deleted: false
-    });
-    return newUser;
-  } catch (error) {
-    throw Error('Failed to create user: ' + error.message);
-  }
-}
-
-// READ a user
-async function login(userName, password) {
-  const user = await getUser(userName);
-  if (!user) throw Error('User not found');
-  if (user.password !== password) throw Error('Wrong Password');
-  return user;
-}
-
-// UPDATE a user
-async function updateUser(userId, password) {
-  const user = await User.findOneAndUpdate(
-    { _id: userId },
-    { $set: { password } },
-    { new: true }
-  );
-  if (!user) throw Error('User not found');
-  return user;
-}
-
-// DELETE a user (soft delete)
-async function deleteUser(userId) {
-  const user = await User.findOneAndUpdate(
-    { _id: userId },
-    { $set: { deleted: true } },
-    { new: true }
-  );
-  if (!user) throw Error('User not found');
-  return user;
-}
+const { register, login, updateUser, deleteUser } = require('../models/user');
+const router = express.Router();
 
 // Utility function
 async function getUser(userName) {
+  const User = mongoose.model('User');
   return await User.findOne({ userName });
 }
 
-module.exports = { register, login, updateUser, deleteUser };
+// CREATE a user
+router.post('/register', async (req, res) => {
+  const { firstName, lastName, userName, email, password } = req.body;
+  try {
+    const user = await register(firstName, lastName, userName, email, password);
+    res.send({ message: 'Account registered', user });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+
+// READ a user (login)
+router.post('/login', async (req, res) => {
+  const { userName, password } = req.body;
+  try {
+    const user = await getUser(userName);
+    if (!user) throw Error('User not found');
+    if (user.password !== password) throw Error('Wrong Password');
+    res.send({ message: 'Login successful', user });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+
+// UPDATE a user
+router.put('/update', async (req, res) => {
+  const { userId, password } = req.body;
+  try {
+    const user = await updateUser(userId, password);
+    res.send({ message: 'Password updated', user });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+
+// DELETE a user
+router.delete('/delete', async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const user = await deleteUser(userId);
+    res.send({ message: 'Account deleted', user });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+
+module.exports = router;

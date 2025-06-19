@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// User schema and model
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -18,6 +19,7 @@ const User = mongoose.model("User", userSchema);
 
 // CREATE a user
 async function register(firstName, lastName, userName, email, password) {
+// to check if userName and email provided are unique
   const existingUser = await User.findOne({ $or: [{ userName }, { email }] });
   if (existingUser) {
     if (existingUser.userName === userName) throw Error('Username already in use');
@@ -40,6 +42,7 @@ async function register(firstName, lastName, userName, email, password) {
 
 // READ a user
 async function login(userName, password) {
+// to check if userName and password provided are correct
   const user = await getUser(userName);
   if (!user) throw Error('User not found');
   if (user.password !== password) throw Error('Wrong Password');
@@ -48,6 +51,7 @@ async function login(userName, password) {
 
 // UPDATE a user
 async function updateUser(userId, password) {
+// to find the user by userId and update his password
   const user = await User.findOneAndUpdate(
     { _id: userId },
     { $set: { password } },
@@ -59,6 +63,7 @@ async function updateUser(userId, password) {
 
 // DELETE a user (soft delete)
 async function deleteUser(userId) {
+// to find the user by userId and set deleted to true for performing a soft delete
   const user = await User.findOneAndUpdate(
     { _id: userId },
     { $set: { deleted: true } },
@@ -68,7 +73,7 @@ async function deleteUser(userId) {
   return user;
 }
 
-// Utility function
+// Utility function to find a user by userName
 async function getUser(userName) {
   return await User.findOne({ userName });
 }

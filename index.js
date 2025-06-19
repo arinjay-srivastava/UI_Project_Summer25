@@ -4,9 +4,7 @@ const app = express();
 const mongoose = require("mongoose");
 const path = require('path');
 
-
 app.use(express.json());
-
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -15,7 +13,6 @@ app.use(function(req, res, next) {
   next();
 });
 
-
 app.options('*', (req, res) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -23,15 +20,15 @@ app.options('*', (req, res) => {
   res.sendStatus(200);
 });
 
-
 app.use(express.static(__dirname + "/public"));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public', 'index.html')));
 
 const userRoutes = require('./server/routes/user');
-const noteRoutes = require('./server/routes/note');
 app.use('/api/user', userRoutes);
+const noteRoutes = require('./server/routes/note');
 app.use('/api/note', noteRoutes);
-
+const followerRoutes = require('./server/routes/follower');
+app.use('/api/follower', followerRoutes);
 
 app.use((req, res) => {
   res.status(404).send({ message: `Route ${req.method} ${req.url} not found` });

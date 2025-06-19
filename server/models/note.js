@@ -11,9 +11,6 @@ const Note = mongoose.model('Note', noteSchema);
 
 // CREATE a note
 async function createNote(userId, content) {
-  if (!mongoose.isValidObjectId(userId)) {
-    throw Error('Invalid user ID format');
-  }
   const user = await mongoose.model('User').findById(userId);
   if (!user) throw Error('User not found');
   const note = await Note.create({
@@ -26,9 +23,6 @@ async function createNote(userId, content) {
 
 // READ a note
 async function getNote(noteId) {
-  if (!mongoose.isValidObjectId(noteId)) {
-    throw Error('Invalid note ID format');
-  }
   const note = await Note.findById(noteId);
   if (!note || note.deleted) throw Error('Note not found');
   return note;
@@ -36,9 +30,6 @@ async function getNote(noteId) {
 
 // UPDATE a note
 async function updateNote(noteId, content) {
-  if (!mongoose.isValidObjectId(noteId)) {
-    throw Error('Invalid note ID format');
-  }
   const note = await Note.findOneAndUpdate(
     { _id: noteId, deleted: false },
     { $set: { content } },
@@ -50,9 +41,6 @@ async function updateNote(noteId, content) {
 
 // DELETE a note (soft delete)
 async function deleteNote(noteId) {
-  if (!mongoose.isValidObjectId(noteId)) {
-    throw Error('Invalid note ID format');
-  }
   const note = await Note.findOneAndUpdate(
     { _id: noteId, deleted: false },
     { $set: { deleted: true } },

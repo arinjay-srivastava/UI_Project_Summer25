@@ -1,84 +1,76 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const { register, login, updateUser, deleteUser } = require('../models/user');
-const router = express.Router();
+const mongoose = require('mongoose');
 
-router
-  .post('/login', async (req, res) => {
-    try {
-      if (!req.body) {
-        return res.status(400).send({ message: 'Request body is missing' });
-      }
-      const { userName, password } = req.body;
-      if (!userName || !password) {
-        return res.status(400).send({ message: 'Username and password are required' });
-      }
-      const user = await login(userName, password);
-      res.send({ message: 'Login successful', ...user, password: undefined });
-    } catch (error) {
-      console.log('Login error:', error);
-      res.status(error.message.includes('not found') ? 401 : 400).send({ message: error.message });
-    }
-  })
+const userSchema = new mongoose.Schema({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  userName: { type: String, required: true, unique: true },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email']
+  },
+  password: { type: String, required: true },
+  deleted: { type: Boolean, default: false }
+});
 
-  .post('/register', async (req, res) => {
-    try {
-      console.log('Register request body:', req.body);
-      if (!req.body) {
-        return res.status(400).send({ message: 'Request body is missing' });
-      }
-      const { firstName, lastName, userName, email, password } = req.body;
-      if (!firstName || !lastName || !userName || !email || !password) {
-        return res.status(400).send({ message: 'All fields are required' });
-      }
-      const user = await register(firstName, lastName, userName, email, password);
-      res.send({ message: 'Account registered', ...user, password: undefined });
-    } catch (error) {
-      console.log('Register error:', error);
-      res.status(error.message.includes('already in use') ? 401 : 400).send({ message: error.message });
-    }
-  })
+const User = mongoose.model("User", userSchema);
 
-  .put('/update', async (req, res) => {
-    try {
-      console.log('Update request body:', req.body);
-      if (!req.body) {
-        return res.status(400).send({ message: 'Request body is missing' });
-      }
-      const { userId, password } = req.body;
-      if (!userId || !password) {
-        return res.status(400).send({ message: 'User ID and password are required' });
-      }
-      if (!mongoose.isValidObjectId(userId)) {
-        return res.status(400).send({ message: 'Invalid user ID format' });
-      }
-      const user = await updateUser(userId, password);
-      res.send({ message: 'Password updated', ...user, password: undefined });
-    } catch (error) {
-      console.log('Update error:', error);
-      res.status(error.message.includes('not found') ? 401 : 400).send({ message: error.message });
-    }
-  })
+// CREATE a user
+async function register(firstName, lastName, userName, email, password) {
+  const existingUser = await User.findOne({ $or: [{ userName }, { email }] });
+  if (existingUser) {
+    if (existingUser.userName === userName) throw Error('Username already in use');
+    if (existingUser.email === email) throw Error('Email already in use');
+  }
+  try {
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      userName,
+      email,
+      password,
+      deleted: false
+    });
+    return newUser;
+  } catch (error) {
+    throw Error('Failed to create user: ' + error.message);
+  }
+}
 
-  .delete('/delete', async (req, res) => {
-    try {
-      console.log('Delete request body:', req.body);
-      if (!req.body) {
-        return res.status(400).send({ message: 'Request body is missing' });
-      }
-      const { userId } = req.body;
-      if (!userId) {
-        return res.status(400).send({ message: 'User ID is required' });
-      }
-      if (!mongoose.isValidObjectId(userId)) {
-        return res.status(400).send({ message: 'Invalid user ID format' });
-      }
-      const user = await deleteUser(userId);
-      res.send({ message: 'Account deleted', ...user, password: undefined });
-    } catch (error) {
-      console.log('Delete error:', error);
-      res.status(error.message.includes('not found') ? 401 : 400).send({ message: error.message });
-    }
-  });
+// READ a user
+async function login(userName, password) {
+  const user = await getUser(userName);
+  if (!user) throw Error('User not found');
+  if (user.password !== password) throw Error('Wrong Password');
+  return user;
+}
 
-module.exports = router;
+// UPDATE a user
+async function updateUser(userId, password) {
+  const user = await User.findOneAndUpdate(
+    { _id: userId },
+    { $set: { password } },
+    { new: true }
+  );
+  if (!user) throw Error('User not found');
+  return user;
+}
+
+// DELETE a user (soft delete)
+async function deleteUser(userId) {
+  const user = await User.findOneAndUpdate(
+    { _id: userId },
+    { $set: { deleted: true } },
+    { new: true }
+  );
+  if (!user) throw Error('User not found');
+  return user;
+}
+
+// Utility function
+async function getUser(userName) {
+  return await User.findOne({ userName });
+}
+
+module.exports = { register, login, updateUser, deleteUser };

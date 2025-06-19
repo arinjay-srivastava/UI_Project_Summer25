@@ -4,6 +4,9 @@
 ### dotenv ###
 .env
 
+# Ignoring some temporary files
+project.zip
+
 ### Node ###
 # Logs
 logs

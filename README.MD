@@ -2,7 +2,7 @@
 
 ## What is NotePad?
 
-NotePad is a simple web app where you can create, view, edit, and delete notes. You can also follow other users to connect with them. It’s built using HTML, CSS, JavaScript, and Node.js, with a MySQL database to store your notes and user information.
+NotePad is a simple web app where you can create, view, edit, and delete notes. You can also follow other users to connect with them. It’s built using HTML, CSS, JavaScript, and Node.js, with a MongoDB database to store your notes and user information.
 
 ## Features
 

@@ -3,12 +3,6 @@ const mongoose = require('mongoose');
 const { register, login, updateUser, deleteUser } = require('../models/user');
 const router = express.Router();
 
-// Utility function
-async function getUser(userName) {
-  const User = mongoose.model('User');
-  return await User.findOne({ userName });
-}
-
 // CREATE a user
 router.post('/register', async (req, res) => {
   const { firstName, lastName, userName, email, password } = req.body;
@@ -24,9 +18,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { userName, password } = req.body;
   try {
-    const user = await getUser(userName);
-    if (!user) throw Error('User not found');
-    if (user.password !== password) throw Error('Wrong Password');
+    const user = await login(userName, password); // Use model’s login function
     res.send({ message: 'Login successful', user });
   } catch (error) {
     res.status(400).send({ message: error.message });

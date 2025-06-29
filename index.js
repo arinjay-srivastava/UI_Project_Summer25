@@ -20,8 +20,8 @@ app.options('*', (req, res) => {
   res.sendStatus(200);
 });
 
-app.use(express.static(__dirname + "/public"));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public', 'index.html')));
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'client', 'build', 'index.html')));
 
 const userRoutes = require('./server/routes/user');
 app.use('/api/user', userRoutes);

@@ -26,8 +26,8 @@ async function createNote(userId, content) {
 // READ a note
 async function getNote(noteId) {
 // to find the note by noteId and check if it exists and is not deleted
-  const note = await Note.findById(noteId);
-  if (!note || note.deleted) throw Error('Note not found');
+const note = await Note.find({userId: noteId, deleted: false});
+  if (!note) throw Error('Note not found');
   return note;
 }
 

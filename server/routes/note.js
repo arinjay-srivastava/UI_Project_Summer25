@@ -17,7 +17,7 @@ router.post('/create', async (req, res) => {
 router.post('/read', async (req, res) => {
   const { noteId } = req.body;
   try {
-    const notes = await Note.find({ userId: noteId });
+    const notes = await getNote(noteId);
     res.status(200).json({ notes });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -29,11 +29,7 @@ router.put('/update', async (req, res) => {
   const { noteId, content } = req.body;
   try {
     if (!noteId || !content) throw new Error('Missing data');
-    const updatedNote = await Note.findByIdAndUpdate(
-      noteId,
-      { content },
-      { new: true }
-    );
+    const updatedNote = await updateNote(noteId, content);
     if (!updatedNote) throw new Error('Note not found');
     res.status(200).json({ message: 'Note updated', note: updatedNote });
   } catch (error) {

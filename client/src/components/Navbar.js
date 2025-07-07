@@ -1,16 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Navbar() {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    setIsLoggedIn(!!storedUser);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    setIsLoggedIn(false);        // ✅ trigger re-render
     navigate('/');
   };
-
-  const isLoggedIn = localStorage.getItem('user');
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light px-3">

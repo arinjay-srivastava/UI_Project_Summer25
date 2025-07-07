@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
-import ProfilePage from './components/ProfilePage'; // new
+import ProfilePage from './components/ProfilePage';
 
 function App() {
   return (

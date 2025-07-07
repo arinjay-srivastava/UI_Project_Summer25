@@ -13,7 +13,7 @@ function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    setIsLoggedIn(false);        // ✅ trigger re-render
+    setIsLoggedIn(false);        
     navigate('/');
   };
 

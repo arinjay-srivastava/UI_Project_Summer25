@@ -17,10 +17,10 @@ router.post('/create', async (req, res) => {
 router.post('/read', async (req, res) => {
   const { noteId } = req.body;
   try {
-    const note = await getNote(noteId);
-    res.send({ message: 'Note found', note });
+    const notes = await Note.find({ userId: noteId });
+    res.status(200).json({ notes });
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
 
@@ -28,12 +28,19 @@ router.post('/read', async (req, res) => {
 router.put('/update', async (req, res) => {
   const { noteId, content } = req.body;
   try {
-    const note = await updateNote(noteId, content);
-    res.send({ message: 'Note updated', note });
+    if (!noteId || !content) throw new Error('Missing data');
+    const updatedNote = await Note.findByIdAndUpdate(
+      noteId,
+      { content },
+      { new: true }
+    );
+    if (!updatedNote) throw new Error('Note not found');
+    res.status(200).json({ message: 'Note updated', note: updatedNote });
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
+
 
 // DELETE a note
 router.delete('/delete', async (req, res) => {

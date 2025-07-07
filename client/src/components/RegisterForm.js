@@ -12,16 +12,18 @@ function RegisterForm() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3000/api/user/register', {
+      const response = await fetch('/api/user/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firstName, lastName, userName, email, password })
       });
+
       const data = await response.json();
+
       if (response.ok) {
         setMessage(data.message);
       } else {
-        setMessage(data.message);
+        setMessage(data.message || 'Registration failed.');
       }
     } catch (error) {
       setMessage('Error: ' + error.message);

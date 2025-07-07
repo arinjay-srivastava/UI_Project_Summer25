@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs'); // Add bcrypt
+const bcrypt = require('bcryptjs');
 
-// User schema and model
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -20,13 +19,17 @@ const User = mongoose.model("User", userSchema);
 
 // CREATE a user
 async function register(firstName, lastName, userName, email, password) {
+  console.log("REGISTERING:", firstName, lastName, userName, email);
+
   const existingUser = await User.findOne({ $or: [{ userName }, { email }] });
   if (existingUser) {
+    console.log("User already exists");
     if (existingUser.userName === userName) throw Error('Username already in use');
     if (existingUser.email === email) throw Error('Email already in use');
   }
+
   try {
-    const hashedPassword = await bcrypt.hash(password, 10); // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       firstName,
       lastName,
@@ -35,8 +38,10 @@ async function register(firstName, lastName, userName, email, password) {
       password: hashedPassword,
       deleted: false
     });
+    console.log("USER CREATED:", newUser);
     return newUser;
   } catch (error) {
+    console.error("ERROR DURING REGISTRATION:", error);
     throw Error('Failed to create user: ' + error.message);
   }
 }
@@ -45,14 +50,14 @@ async function register(firstName, lastName, userName, email, password) {
 async function login(userName, password) {
   const user = await getUser(userName);
   if (!user) throw Error('User not found');
-  const isMatch = await bcrypt.compare(password, user.password); // Compare hashed password
+  const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw Error('Wrong Password');
   return user;
 }
 
 // UPDATE a user
 async function updateUser(userId, password) {
-  const hashedPassword = await bcrypt.hash(password, 10); // Hash new password
+  const hashedPassword = await bcrypt.hash(password, 10);
   const user = await User.findOneAndUpdate(
     { _id: userId },
     { $set: { password: hashedPassword } },
@@ -62,7 +67,7 @@ async function updateUser(userId, password) {
   return user;
 }
 
-// DELETE a user (soft delete)
+// DELETE a user
 async function deleteUser(userId) {
   const user = await User.findOneAndUpdate(
     { _id: userId },
@@ -73,7 +78,7 @@ async function deleteUser(userId) {
   return user;
 }
 
-// Utility function to find a user by userName
+// Utility to get a user
 async function getUser(userName) {
   return await User.findOne({ userName });
 }

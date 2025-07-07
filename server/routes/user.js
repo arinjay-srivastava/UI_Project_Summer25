@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const { register, login, updateUser, deleteUser } = require('../models/user');
 const router = express.Router();
 
@@ -8,9 +7,10 @@ router.post('/register', async (req, res) => {
   const { firstName, lastName, userName, email, password } = req.body;
   try {
     const user = await register(firstName, lastName, userName, email, password);
-    res.send({ message: 'Account registered', user });
+    return res.json({ message: 'Account registered', user });
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    console.error("REGISTER ERROR:", error.message);
+    return res.status(400).json({ message: error.message });
   }
 });
 
@@ -18,10 +18,11 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { userName, password } = req.body;
   try {
-    const user = await login(userName, password); // Use model’s login function
-    res.send({ message: 'Login successful', user });
+    const user = await login(userName, password);
+    return res.json({ message: 'Login successful', user });
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    console.error("LOGIN ERROR:", error.message);
+    return res.status(400).json({ message: error.message });
   }
 });
 
@@ -30,9 +31,9 @@ router.put('/update', async (req, res) => {
   const { userId, password } = req.body;
   try {
     const user = await updateUser(userId, password);
-    res.send({ message: 'Password updated', user });
+    return res.json({ message: 'Password updated', user });
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 });
 
@@ -41,9 +42,9 @@ router.delete('/delete', async (req, res) => {
   const { userId } = req.body;
   try {
     const user = await deleteUser(userId);
-    res.send({ message: 'Account deleted', user });
+    return res.json({ message: 'Account deleted', user });
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 });
 

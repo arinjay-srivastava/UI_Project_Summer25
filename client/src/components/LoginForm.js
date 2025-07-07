@@ -17,6 +17,8 @@ function LoginForm() {
       const data = await response.json();
       if (response.ok) {
         setMessage(data.message);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = '/profile'; // redirect after login
       } else {
         setMessage(data.message);
       }
